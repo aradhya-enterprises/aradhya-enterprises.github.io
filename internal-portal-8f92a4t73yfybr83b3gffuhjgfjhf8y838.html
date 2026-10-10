@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Aradhya Enterprises — Internal Operations Portal</title>
+  <title>Aradhya Solar — Internal Operations Portal</title>
   <style>
     :root {
       --primary: #d97706;
@@ -151,15 +151,9 @@
       transition: background 0.2s ease, transform 0.1s ease;
     }
 
-    .btn-submit:hover {
-      background: var(--primary-dark);
-    }
+    .btn-submit:hover { background: var(--primary-dark); }
+    .btn-submit:active { transform: scale(0.99); }
 
-    .btn-submit:active {
-      transform: scale(0.99);
-    }
-
-    /* Loading overlay */
     #loadingOverlay {
       display: none;
       text-align: center;
@@ -189,7 +183,7 @@
 
 <div class="wrapper">
   <div class="header">
-    <h1>☀️ Aradhya Solar Portal</h1>
+    <h1>☀️ Aradhya Enterprises Solar Portal</h1>
     <p>Internal Quotation & Invoice Generation Terminal</p>
   </div>
 
@@ -222,8 +216,8 @@
       </div>
 
       <div class="form-group">
-        <label>Document Number *</label>
-        <input type="text" id="docNumber" required placeholder="e.g. QT-2026-001">
+        <label>Document Date *</label>
+        <input type="date" id="docDate" required>
       </div>
 
       <div class="form-group">
@@ -259,10 +253,16 @@
 
       <div class="form-group">
         <label>Panel Type *</label>
-        <select id="panelType" required>
+        <select id="panelType" required onchange="toggleBatteryField()">
           <option value="On-Grid">On-Grid</option>
           <option value="Hybrid">Hybrid</option>
         </select>
+      </div>
+
+      <!-- Battery Field (Only visible when Hybrid is selected) -->
+      <div class="form-group full-width" id="batteryGroup" style="display: none;">
+        <label>Battery Specification *</label>
+        <input type="text" id="batteryText" placeholder="e.g. 5kW Lithium Battery">
       </div>
 
       <div class="form-group">
@@ -271,16 +271,11 @@
       </div>
 
       <div class="form-group">
-        <label>Battery Text (if Hybrid)</label>
-        <input type="text" id="batteryText" placeholder="e.g. 5kW Lithium Battery">
-      </div>
-
-      <div class="form-group">
         <label>Panel Rate (per Watt) *</label>
         <input type="number" step="0.01" id="panelRate" value="25" required oninput="calculateTotals()">
       </div>
 
-      <div class="form-group">
+      <div class="form-group full-width">
         <label>Installation Rate (per Watt) *</label>
         <input type="number" step="0.01" id="installRate" value="5" required oninput="calculateTotals()">
       </div>
@@ -308,6 +303,24 @@
   // Replace with your Google Apps Script Web App URL
   const WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
+  // Set default Document Date to today
+  document.getElementById('docDate').valueAsDate = new Date();
+
+  function toggleBatteryField() {
+    let panelType = document.getElementById('panelType').value;
+    let batteryGroup = document.getElementById('batteryGroup');
+    let batteryInput = document.getElementById('batteryText');
+    
+    if (panelType === 'Hybrid') {
+      batteryGroup.style.display = 'block';
+      batteryInput.required = true;
+    } else {
+      batteryGroup.style.display = 'none';
+      batteryInput.required = false;
+      batteryInput.value = '';
+    }
+  }
+
   function calculateTotals() {
     let qty = parseFloat(document.getElementById('quantity').value) || 0;
     let panelRate = parseFloat(document.getElementById('panelRate').value) || 0;
@@ -317,7 +330,6 @@
     let panelPrice = totalWatts * panelRate;
     let installPrice = totalWatts * installRate;
 
-    // Rules matching your script tax brackets
     let tax1 = panelPrice * 0.025;
     let tax2 = panelPrice * 0.025;
     let tax3 = installPrice * 0.09;
@@ -332,8 +344,10 @@
     document.getElementById('lblFinalTotal').innerText = '₹ ' + finalTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   }
 
-  // Trigger calculation on load
-  window.onload = calculateTotals;
+  window.onload = function() {
+    calculateTotals();
+    toggleBatteryField();
+  };
 
   function handleFormSubmit(e) {
     e.preventDefault();
@@ -345,14 +359,14 @@
       adminPassword: document.getElementById('adminPassword').value,
       commercialOrDomestic: document.getElementById('commercialOrDomestic').value,
       docType: document.getElementById('docType').value,
-      docNumber: document.getElementById('docNumber').value,
+      docDate: document.getElementById('docDate').value,
       email: document.getElementById('email').value,
       clientName: document.getElementById('clientName').value,
       clientAddress: document.getElementById('clientAddress').value,
       manufacturer: document.getElementById('manufacturer').value,
       panelType: document.getElementById('panelType').value,
+      batteryText: document.getElementById('batteryText').value || '',
       quantity: document.getElementById('quantity').value,
-      batteryText: document.getElementById('batteryText').value,
       panelRate: document.getElementById('panelRate').value,
       installRate: document.getElementById('installRate').value
     };
@@ -368,9 +382,11 @@
     .then(() => {
       alert("Success! Document generated, backed up in Google Drive, and emailed.");
       document.getElementById('internalForm').reset();
+      document.getElementById('docDate').valueAsDate = new Date(); // Reset date back to today
       document.getElementById('submitBtn').style.display = 'block';
       document.getElementById('loadingOverlay').style.display = 'none';
       calculateTotals();
+      toggleBatteryField();
     })
     .catch((err) => {
       alert('Submission error: ' + err);
