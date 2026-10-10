@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Aradhya Enterprises — Internal Operations Portal</title>
+  <title>Aradhya Solar — Internal Operations Portal</title>
   <style>
     :root {
       --primary: #d97706;
@@ -183,7 +183,7 @@
 
 <div class="wrapper">
   <div class="header">
-    <h1>☀️ Aradhya Enterprises Solar Panel and Installation</h1>
+    <h1>☀️ Aradhya Solar Portal</h1>
     <p>Internal Quotation & Invoice Generation Terminal</p>
   </div>
 
@@ -286,7 +286,7 @@
       <div class="calc-row"><span>Panel Subtotal:</span> <span id="lblPanelPrice">₹0.00</span></div>
       <div class="calc-row"><span>Installation Subtotal:</span> <span id="lblInstallPrice">₹0.00</span></div>
       <div class="calc-row"><span>GST Component (Taxes):</span> <span id="lblTotalTax">₹0.00</span></div>
-      <div class="calc-row total"><span>Final Quotable Total:</span> <span id="lblFinalTotal">₹0.00</span></div>
+      <div class="calc-row total"><span id="lblTotalHeader">Final Quotable Total:</span> <span id="lblFinalTotal">₹0.00</span></div>
     </div>
 
     <button type="submit" id="submitBtn" class="btn-submit">Generate, Save & Email PDF</button>
@@ -339,70 +339,9 @@
 
     let finalTotal = panelPrice + installPrice + totalTax;
 
-    // Dynamically update the total label based on selected Document Type
+    // Dynamically update total label text based on document type
     let totalLabelText = (docType === "Invoice") ? "Final Invoice Total:" : "Final Quotable Total:";
     document.getElementById('lblTotalHeader').innerText = totalLabelText;
 
     document.getElementById('lblPanelPrice').innerText = '₹ ' + panelPrice.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('lblInstallPrice').innerText = '₹ ' + installPrice.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('lblTotalTax').innerText = '₹ ' + totalTax.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('lblFinalTotal').innerText = '₹ ' + finalTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  }
-
-  window.onload = function() {
-    calculateTotals();
-    toggleBatteryField();
-    
-    // Recalculate totals whenever Document Type changes to update the label
-    document.getElementById('docType').addEventListener('change', calculateTotals);
-  };
-
-  function handleFormSubmit(e) {
-    e.preventDefault();
-
-    document.getElementById('submitBtn').style.display = 'none';
-    document.getElementById('loadingOverlay').style.display = 'block';
-
-    let payload = {
-      adminPassword: document.getElementById('adminPassword').value,
-      commercialOrDomestic: document.getElementById('commercialOrDomestic').value,
-      docType: document.getElementById('docType').value,
-      docDate: document.getElementById('docDate').value,
-      email: document.getElementById('email').value,
-      clientName: document.getElementById('clientName').value,
-      clientAddress: document.getElementById('clientAddress').value,
-      manufacturer: document.getElementById('manufacturer').value,
-      panelType: document.getElementById('panelType').value,
-      batteryText: document.getElementById('batteryText').value || '',
-      quantity: document.getElementById('quantity').value,
-      panelRate: document.getElementById('panelRate').value,
-      installRate: document.getElementById('installRate').value
-    };
-
-    fetch(WEB_APP_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(() => {
-      alert("Success! Document generated, backed up in Google Drive, and emailed.");
-      document.getElementById('internalForm').reset();
-      document.getElementById('docDate').valueAsDate = new Date();
-      document.getElementById('submitBtn').style.display = 'block';
-      document.getElementById('loadingOverlay').style.display = 'none';
-      calculateTotals();
-      toggleBatteryField();
-    })
-    .catch((err) => {
-      alert('Submission error: ' + err);
-      document.getElementById('submitBtn').style.display = 'block';
-      document.getElementById('loadingOverlay').style.display = 'none';
-    });
-  }
-</script>
-
-</body>
-</html>
+    document.getElementById('lblInstallPrice').innerText = '₹ ' + installPrice.toLocaleString('en-IN', {minimumFractionDigits: 2,
