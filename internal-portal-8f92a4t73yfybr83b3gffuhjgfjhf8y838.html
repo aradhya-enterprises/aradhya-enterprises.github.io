@@ -322,6 +322,7 @@
   }
 
   function calculateTotals() {
+    let docType = document.getElementById('docType').value;
     let qty = parseFloat(document.getElementById('quantity').value) || 0;
     let panelRate = parseFloat(document.getElementById('panelRate').value) || 0;
     let installRate = parseFloat(document.getElementById('installRate').value) || 0;
@@ -338,6 +339,10 @@
 
     let finalTotal = panelPrice + installPrice + totalTax;
 
+    // Dynamically update the total label based on selected Document Type
+    let totalLabelText = (docType === "Invoice") ? "Final Invoice Total:" : "Final Quotable Total:";
+    document.getElementById('lblTotalHeader').innerText = totalLabelText;
+
     document.getElementById('lblPanelPrice').innerText = '₹ ' + panelPrice.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('lblInstallPrice').innerText = '₹ ' + installPrice.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('lblTotalTax').innerText = '₹ ' + totalTax.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -347,6 +352,9 @@
   window.onload = function() {
     calculateTotals();
     toggleBatteryField();
+    
+    // Recalculate totals whenever Document Type changes to update the label
+    document.getElementById('docType').addEventListener('change', calculateTotals);
   };
 
   function handleFormSubmit(e) {
@@ -382,7 +390,7 @@
     .then(() => {
       alert("Success! Document generated, backed up in Google Drive, and emailed.");
       document.getElementById('internalForm').reset();
-      document.getElementById('docDate').valueAsDate = new Date(); // Reset date back to today
+      document.getElementById('docDate').valueAsDate = new Date();
       document.getElementById('submitBtn').style.display = 'block';
       document.getElementById('loadingOverlay').style.display = 'none';
       calculateTotals();
